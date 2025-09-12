@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import Notifications from '../Notifications';
 
 const Layout = () => {
   return (
@@ -14,6 +15,8 @@ const Layout = () => {
           <Outlet />
         </main>
       </div>
+      
+      <Notifications />
     </div>
   );
 };

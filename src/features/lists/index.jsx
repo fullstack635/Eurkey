@@ -25,7 +25,7 @@ const Lists = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [newList, setNewList] = useState({ title: '', items: [] });
-  const [editingItem, setEditingItem] = useState(null);
+  // const [editingItem, setEditingItem] = useState(null);
 
   const handleCreateList = (e) => {
     e.preventDefault();

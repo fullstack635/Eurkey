@@ -1,0 +1,94 @@
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import ReminderCard from './components/ReminderCard';
+import ReminderForm from './components/ReminderForm';
+import { useRemindersOperations } from './hooks/useRemindersQuery';
+
+const Reminders = () => {
+  const {
+    reminders,
+    isLoading,
+    isError,
+    error,
+    createReminder,
+    deleteReminder,
+    toggleCompletion,
+    isCreating
+  } = useRemindersOperations();
+  
+  const [showForm, setShowForm] = useState(false);
+
+  const handleSubmit = (reminderData) => {
+    createReminder(reminderData, {
+      onSuccess: () => {
+        setShowForm(false);
+      }
+    });
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+  };
+
+  const handleToggleComplete = (id, currentCompleted) => {
+    toggleCompletion({ id, completed: !currentCompleted });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error al cargar los recordatorios</p>
+          <p className="text-sm text-gray-500">{error?.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Reminders</h1>
+          <p className="text-gray-600">Manage your reminders and tasks</p>
+        </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Reminder
+        </button>
+      </div>
+
+      {showForm && (
+        <ReminderForm 
+          onSubmit={handleSubmit} 
+          onCancel={handleCancel}
+          loading={isCreating}
+        />
+      )}
+
+      <div className="space-y-4">
+        {reminders.map((reminder) => (
+          <ReminderCard
+            key={reminder.id}
+            reminder={reminder}
+            onToggleComplete={(id) => handleToggleComplete(id, reminder.completed)}
+            onDelete={deleteReminder}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Reminders;

@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://plxuybxql7.execute-api.us-east-1.amazonaws.com/staging';
+const API_BASE_URL = import.meta.env.DEV 
+  ? '/api' 
+  : import.meta.env.VITE_API_BASE_URL;
 
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {
@@ -8,11 +10,17 @@ class ApiClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
     
+    // Get auth token from localStorage
+    const token = localStorage.getItem('authToken');
+    
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
+      mode: 'cors',
+      credentials: 'omit',
       ...options,
     };
 

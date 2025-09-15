@@ -30,8 +30,10 @@ const Reminders = () => {
     setShowForm(false);
   };
 
-  const handleToggleComplete = (id, currentCompleted) => {
-    toggleCompletion({ id, completed: !currentCompleted });
+  const handleToggleComplete = (id) => {
+    const reminder = reminders.find(r => r.id === id);
+    const newStatus = reminder.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
+    toggleCompletion({ id, completed: newStatus === 'COMPLETED' });
   };
 
   if (isLoading) {
@@ -82,7 +84,7 @@ const Reminders = () => {
           <ReminderCard
             key={reminder.id}
             reminder={reminder}
-            onToggleComplete={(id) => handleToggleComplete(id, reminder.completed)}
+            onToggleComplete={handleToggleComplete}
             onDelete={deleteReminder}
           />
         ))}

@@ -16,7 +16,7 @@ export const useReminders = (filters = {}) => {
   return useQuery({
     queryKey: remindersKeys.list(filters),
     queryFn: () => remindersService.getReminders(filters),
-    select: (response) => response.data, // Extract data from response
+    select: (response) => response.data?.reminders || [], // Extract reminders array from response
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });

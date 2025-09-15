@@ -1,40 +1,11 @@
-// import { apiClient } from './api';
+import { apiClient } from './api';
 
 export const remindersService = {
-  // Get all reminders
+  // Get all reminders for the authenticated user
   async getReminders() {
     try {
-      // For now, return mock data since we don't have the API endpoint
-      // In production, this would be: return await apiClient.get('/reminders');
-      return {
-        success: true,
-        data: [
-          {
-            id: 1,
-            title: 'Team meeting',
-            description: 'Weekly team sync meeting',
-            date: new Date(),
-            completed: false,
-            priority: 'high'
-          },
-          {
-            id: 2,
-            title: 'Buy groceries',
-            description: 'Milk, bread, eggs',
-            date: new Date(),
-            completed: false,
-            priority: 'medium'
-          },
-          {
-            id: 3,
-            title: 'Call dentist',
-            description: 'Schedule appointment',
-            date: new Date(Date.now() + 86400000),
-            completed: true,
-            priority: 'low'
-          }
-        ]
-      };
+      const response = await apiClient.get('/reminders/user');
+      return response;
     } catch (error) {
       throw new Error(error.message || 'Failed to fetch reminders');
     }

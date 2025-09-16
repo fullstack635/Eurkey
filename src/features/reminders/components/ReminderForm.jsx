@@ -2,15 +2,20 @@ import { useState } from 'react';
 
 const ReminderForm = ({ onSubmit, onCancel, initialData = null, loading = false }) => {
   const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    date: initialData?.date || '',
-    priority: initialData?.priority || 'medium'
+    reminder: initialData?.reminder || '',
+    scheduledAt: initialData?.scheduledAt ? new Date(initialData.scheduledAt).toISOString().slice(0, 16) : ''
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Convert scheduledAt to ISO format for the API
+    const submitData = {
+      ...formData,
+      scheduledAt: new Date(formData.scheduledAt).toISOString()
+    };
+    
+    onSubmit(submitData);
   };
 
   const handleChange = (field, value) => {
@@ -24,47 +29,25 @@ const ReminderForm = ({ onSubmit, onCancel, initialData = null, loading = false 
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Reminder</label>
           <input
             type="text"
-            value={formData.title}
-            onChange={(e) => handleChange('title', e.target.value)}
+            value={formData.reminder}
+            onChange={(e) => handleChange('reminder', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="Enter your reminder text"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => handleChange('description', e.target.value)}
+          <label className="block text-sm font-medium text-gray-700 mb-2">Scheduled Date & Time</label>
+          <input
+            type="datetime-local"
+            value={formData.scheduledAt}
+            onChange={(e) => handleChange('scheduledAt', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            rows={3}
+            required
           />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Date & Time</label>
-            <input
-              type="datetime-local"
-              value={formData.date}
-              onChange={(e) => handleChange('date', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
-            <select
-              value={formData.priority}
-              onChange={(e) => handleChange('priority', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
         </div>
         <div className="flex space-x-3">
           <button

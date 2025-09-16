@@ -11,23 +11,43 @@ const Reminders = () => {
     isError,
     error,
     createReminder,
+    updateReminder,
     deleteReminder,
     toggleCompletion,
-    isCreating
+    isCreating,
+    isUpdating
   } = useRemindersOperations();
   
   const [showForm, setShowForm] = useState(false);
+  const [editingReminder, setEditingReminder] = useState(null);
 
   const handleSubmit = (reminderData) => {
-    createReminder(reminderData, {
-      onSuccess: () => {
-        setShowForm(false);
-      }
-    });
+    if (editingReminder) {
+      // Update existing reminder
+      updateReminder({ id: editingReminder.id, ...reminderData }, {
+        onSuccess: () => {
+          setEditingReminder(null);
+          setShowForm(false);
+        }
+      });
+    } else {
+      // Create new reminder
+      createReminder(reminderData, {
+        onSuccess: () => {
+          setShowForm(false);
+        }
+      });
+    }
   };
 
   const handleCancel = () => {
     setShowForm(false);
+    setEditingReminder(null);
+  };
+
+  const handleEdit = (reminder) => {
+    setEditingReminder(reminder);
+    setShowForm(true);
   };
 
   const handleToggleComplete = (id) => {
@@ -75,7 +95,8 @@ const Reminders = () => {
         <ReminderForm 
           onSubmit={handleSubmit} 
           onCancel={handleCancel}
-          loading={isCreating}
+          initialData={editingReminder}
+          loading={isCreating || isUpdating}
         />
       )}
 
@@ -86,6 +107,7 @@ const Reminders = () => {
             reminder={reminder}
             onToggleComplete={handleToggleComplete}
             onDelete={deleteReminder}
+            onEdit={handleEdit}
           />
         ))}
       </div>

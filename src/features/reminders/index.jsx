@@ -17,7 +17,7 @@ const Reminders = () => {
     isCreating,
     isUpdating
   } = useRemindersOperations();
-  
+
   const [showForm, setShowForm] = useState(false);
   const [editingReminder, setEditingReminder] = useState(null);
 
@@ -84,7 +84,7 @@ const Reminders = () => {
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors bg-black"
         >
           <Plus className="w-4 h-4 mr-2" />
           New Reminder
@@ -92,8 +92,8 @@ const Reminders = () => {
       </div>
 
       {showForm && (
-        <ReminderForm 
-          onSubmit={handleSubmit} 
+        <ReminderForm
+          onSubmit={handleSubmit}
           onCancel={handleCancel}
           initialData={editingReminder}
           loading={isCreating || isUpdating}

@@ -48,11 +48,10 @@ const Dashboard = () => {
                   <p className="font-medium text-gray-900">{reminder.title}</p>
                   <p className="text-sm text-gray-500">{reminder.time}</p>
                 </div>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  reminder.status === 'upcoming' 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${reminder.status === 'upcoming'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-yellow-100 text-yellow-800'
+                  }`}>
                   {reminder.status}
                 </span>
               </div>
@@ -63,15 +62,15 @@ const Dashboard = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full flex items-center p-3 text-left bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors">
+            <button className="w-full flex items-center p-3 text-left bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors bg-black">
               <Plus className="w-5 h-5 mr-3" />
               Create New Reminder
             </button>
-            <button className="w-full flex items-center p-3 text-left bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
+            <button className="w-full flex items-center p-3 text-left bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors bg-black">
               <CheckSquare className="w-5 h-5 mr-3" />
               Create New List
             </button>
-            <button className="w-full flex items-center p-3 text-left bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+            <button className="w-full flex items-center p-3 text-left bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors bg-black">
               <Calendar className="w-5 h-5 mr-3" />
               View Calendar
             </button>

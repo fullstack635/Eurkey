@@ -8,13 +8,13 @@ const ReminderForm = ({ onSubmit, onCancel, initialData = null, loading = false 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Convert scheduledAt to ISO format for the API
     const submitData = {
       ...formData,
       scheduledAt: new Date(formData.scheduledAt).toISOString()
     };
-    
+
     onSubmit(submitData);
   };
 
@@ -53,13 +53,13 @@ const ReminderForm = ({ onSubmit, onCancel, initialData = null, loading = false 
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center bg-black"
           >
             {loading && (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
             )}
-            {loading 
-              ? (initialData ? 'Updating...' : 'Creating...') 
+            {loading
+              ? (initialData ? 'Updating...' : 'Creating...')
               : (initialData ? 'Update Reminder' : 'Create Reminder')
             }
           </button>

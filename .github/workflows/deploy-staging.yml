@@ -8,7 +8,8 @@ on:
 
 env:
   NODE_VERSION: '18'
-  AWS_REGION: 'us-east-1'
+  AWS_REGION: us-east-1
+  STAGE: staging
 
 jobs:
   deploy:

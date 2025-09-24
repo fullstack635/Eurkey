@@ -1,0 +1,118 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy (staging/production)'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      certificate_arn:
+        description: 'ACM Certificate ARN (*.eureky.ai)'
+        required: true
+        type: string
+
+env:
+  AWS_REGION: 'us-east-1'
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+
+    outputs:
+      distribution_id: ${{ steps.deploy.outputs.distribution_id }}
+      bucket_name: ${{ steps.deploy.outputs.bucket_name }}
+      website_url: ${{ steps.deploy.outputs.website_url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set environment variables
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "STACK_NAME=eureky-staging" >> $GITHUB_ENV
+            echo "DOMAIN_NAME=dev.eureky.ai" >> $GITHUB_ENV
+            echo "TEMPLATE_FILE=aws-infrastructure/cloudformation-staging.yml" >> $GITHUB_ENV
+          else
+            echo "STACK_NAME=eureky-production" >> $GITHUB_ENV
+            echo "DOMAIN_NAME=eureky.ai" >> $GITHUB_ENV
+            echo "TEMPLATE_FILE=aws-infrastructure/cloudformation-production.yml" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy CloudFormation stack
+        id: deploy
+        run: |
+          echo "Deploying ${{ github.event.inputs.environment }} environment..."
+          echo "Stack Name: $STACK_NAME"
+          echo "Domain: $DOMAIN_NAME"
+          echo "Certificate ARN: ${{ github.event.inputs.certificate_arn }}"
+
+          aws cloudformation deploy \
+            --template-file "$TEMPLATE_FILE" \
+            --stack-name "$STACK_NAME" \
+            --parameter-overrides \
+              DomainName="$DOMAIN_NAME" \
+              CertificateArn="${{ github.event.inputs.certificate_arn }}" \
+            --capabilities CAPABILITY_IAM \
+            --region $AWS_REGION
+
+          # Get outputs
+          echo "Getting stack outputs..."
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --region $AWS_REGION \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+
+          BUCKET_NAME=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --region $AWS_REGION \
+            --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
+            --output text)
+
+          WEBSITE_URL=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --region $AWS_REGION \
+            --query 'Stacks[0].Outputs[?OutputKey==`WebsiteURL`].OutputValue' \
+            --output text)
+
+          # Set outputs
+          echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "website_url=$WEBSITE_URL" >> $GITHUB_OUTPUT
+
+      - name: Display deployment summary
+        run: |
+          echo "## 🚀 Infrastructure Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Domain:** $DOMAIN_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "**S3 Bucket:** ${{ steps.deploy.outputs.bucket_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**CloudFront Distribution:** ${{ steps.deploy.outputs.distribution_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Website URL:** ${{ steps.deploy.outputs.website_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Add GitHub secret: \`${{ github.event.inputs.environment == 'staging' && 'STAGING' || 'PRODUCTION' }}_CLOUDFRONT_DISTRIBUTION_ID\` = \`${{ steps.deploy.outputs.distribution_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "2. Configure DNS for $DOMAIN_NAME to point to CloudFront" >> $GITHUB_STEP_SUMMARY
+          echo "3. Wait for DNS propagation (up to 48 hours)" >> $GITHUB_STEP_SUMMARY
+
+          echo ""
+          echo "✅ ${{ github.event.inputs.environment }} infrastructure deployed successfully!"
+          echo "🌐 Website URL: ${{ steps.deploy.outputs.website_url }}"
+          echo "📦 S3 Bucket: ${{ steps.deploy.outputs.bucket_name }}"
+          echo "🚀 CloudFront Distribution: ${{ steps.deploy.outputs.distribution_id }}"
+          echo ""
+          echo "📝 Add this secret to GitHub:"
+          echo "${{ github.event.inputs.environment == 'staging' && 'STAGING' || 'PRODUCTION' }}_CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.deploy.outputs.distribution_id }}"

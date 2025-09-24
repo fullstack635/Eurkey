@@ -1,0 +1,67 @@
+import { apiClient } from './api';
+
+export const listsService = {
+  // Get all lists for the authenticated user
+  async getLists(params = {}) {
+    try {
+      const queryParams = new URLSearchParams();
+
+      queryParams.append("includeItems", true)
+
+      // Add optional query parameters
+      if (params.limit) queryParams.append('limit', params.limit);
+      if (params.offset) queryParams.append('offset', params.offset);
+      if (params.status) queryParams.append('status', params.status);
+      if (params.isCompleted !== undefined) queryParams.append('isCompleted', params.isCompleted);
+      if (params.orderBy) queryParams.append('orderBy', params.orderBy);
+      if (params.orderDirection) queryParams.append('orderDirection', params.orderDirection);
+
+      const url = `/lists${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      console.log("url", url);
+      const response = await apiClient.get(url);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch lists');
+    }
+  },
+
+  // Get a specific list by ID
+  async getListById(listId) {
+    try {
+      const response = await apiClient.get(`/lists/${listId}`);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch list');
+    }
+  },
+
+  // Create a new list
+  async createList(listData) {
+    try {
+      const response = await apiClient.post('/lists', listData);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to create list');
+    }
+  },
+
+  // Update an existing list
+  async updateList(listId, updates) {
+    try {
+      const response = await apiClient.put(`/lists/${listId}`, updates);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to update list');
+    }
+  },
+
+  // Delete a list
+  async deleteList(listId) {
+    try {
+      const response = await apiClient.delete(`/lists/${listId}`);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to delete list');
+    }
+  }
+};

@@ -1,0 +1,517 @@
+{
+	"info": {
+		"_postman_id": "eureky-lists-api",
+		"name": "Eureky Lists & Items API",
+		"description": "API endpoints for managing lists and list items in Eureky",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://your-api-gateway-domain.amazonaws.com/dev",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "your-jwt-token-here",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phoneNumber\": \"+1234567890\",\n  \"name\": \"John Doe\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phoneNumber\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phoneNumber\": \"+1234567890\",\n  \"otpCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify-otp"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Lists Management",
+			"item": [
+				{
+					"name": "Create List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Shopping List\",\n  \"description\": \"Weekly grocery shopping list\",\n  \"metadata\": {\n    \"category\": \"shopping\",\n    \"priority\": \"medium\",\n    \"tags\": [\"groceries\", \"weekly\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/lists",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lists"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Lists",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/lists?limit=20&include&offset=0&status=ACTIVE&isCompleted=false&orderBy=createdAt&orderDirection=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lists"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "status",
+									"value": "ACTIVE"
+								},
+								{
+									"key": "isCompleted",
+									"value": "false"
+								},
+								{
+									"key": "orderBy",
+									"value": "createdAt"
+								},
+								{
+									"key": "orderDirection",
+									"value": "desc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get List by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/lists/{{list_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lists",
+								"{{list_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Shopping List\",\n  \"description\": \"Updated weekly grocery shopping list\",\n  \"metadata\": {\n    \"category\": \"shopping\",\n    \"priority\": \"high\",\n    \"tags\": [\"groceries\", \"weekly\", \"urgent\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/lists/{{list_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lists",
+								"{{list_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/lists/{{list_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lists",
+								"{{list_id}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "List Items Management",
+			"item": [
+				{
+					"name": "Add Item to List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Buy milk\",\n  \"description\": \"Get 2% organic milk from dairy section\",\n  \"priority\": \"medium\",\n  \"order\": \"1\",\n  \"metadata\": {\n    \"category\": \"dairy\",\n    \"estimatedTime\": 5,\n    \"notes\": \"Check expiration date\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/list-items/by-list/{{list_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"by-list",
+								"{{list_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get List Items",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/list-items/by-list/{{list_id}}?limit=50&offset=0&isCompleted=false&priority=medium&orderBy=order&orderDirection=asc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"by-list",
+								"{{list_id}}"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "isCompleted",
+									"value": "false"
+								},
+								{
+									"key": "priority",
+									"value": "medium"
+								},
+								{
+									"key": "orderBy",
+									"value": "order"
+								},
+								{
+									"key": "orderDirection",
+									"value": "asc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Buy almond milk\",\n  \"description\": \"Get unsweetened almond milk from dairy section\",\n  \"priority\": \"high\",\n  \"order\": \"1\",\n  \"metadata\": {\n    \"category\": \"dairy\",\n    \"estimatedTime\": 5,\n    \"notes\": \"Check for organic options\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/list-items/{{item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"{{item_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Toggle Item Completion",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/list-items/{{item_id}}/toggle",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"{{item_id}}",
+								"toggle"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/list-items/{{item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"{{item_id}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "Lists Service Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "list_id",
+			"value": "your-list-id-here",
+			"type": "string"
+		},
+		{
+			"key": "item_id",
+			"value": "your-item-id-here",
+			"type": "string"
+		}
+	]
+}

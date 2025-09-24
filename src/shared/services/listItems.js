@@ -1,0 +1,64 @@
+import { apiClient } from './api';
+
+export const listItemsService = {
+  // Get all items for a specific list
+  async getListItems(listId, params = {}) {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      // Add optional query parameters
+      if (params.limit) queryParams.append('limit', params.limit);
+      if (params.offset) queryParams.append('offset', params.offset);
+      if (params.isCompleted !== undefined) queryParams.append('isCompleted', params.isCompleted);
+      if (params.priority) queryParams.append('priority', params.priority);
+      if (params.orderBy) queryParams.append('orderBy', params.orderBy);
+      if (params.orderDirection) queryParams.append('orderDirection', params.orderDirection);
+
+      const url = `/list-items/by-list/${listId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await apiClient.get(url);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch list items');
+    }
+  },
+
+  // Add a new item to a list
+  async addItemToList(listId, itemData) {
+    try {
+      const response = await apiClient.post(`/list-items/by-list/${listId}`, itemData);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to add item to list');
+    }
+  },
+
+  // Update an existing item
+  async updateItem(itemId, updates) {
+    try {
+      const response = await apiClient.put(`/list-items/${itemId}`, updates);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to update item');
+    }
+  },
+
+  // Toggle item completion status
+  async toggleItemCompletion(itemId) {
+    try {
+      const response = await apiClient.post(`/list-items/${itemId}/toggle`);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to toggle item completion');
+    }
+  },
+
+  // Delete an item
+  async deleteItem(itemId) {
+    try {
+      const response = await apiClient.delete(`/list-items/${itemId}`);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to delete item');
+    }
+  }
+};

@@ -62,15 +62,15 @@ const Dashboard = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full flex items-center p-3 text-left bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors bg-black">
+            <button className="w-full flex items-center p-3 text-left bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
               <Plus className="w-5 h-5 mr-3" />
               Create New Reminder
             </button>
-            <button className="w-full flex items-center p-3 text-left bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors bg-black">
+            <button className="w-full flex items-center p-3 text-left bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
               <CheckSquare className="w-5 h-5 mr-3" />
               Create New List
             </button>
-            <button className="w-full flex items-center p-3 text-left bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors bg-black">
+            <button className="w-full flex items-center p-3 text-left bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
               <Calendar className="w-5 h-5 mr-3" />
               View Calendar
             </button>

@@ -21,32 +21,39 @@ Resources:
         IndexDocument: 'index.html'
         ErrorDocument: 'index.html'
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       VersioningConfiguration:
         Status: Enabled
 
-  # S3 Bucket Policy
+  # S3 Bucket Policy for CloudFront OAC
   StagingBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref StagingBucket
       PolicyDocument:
         Statement:
-          - Sid: PublicReadGetObject
+          - Sid: AllowCloudFrontServicePrincipal
             Effect: Allow
-            Principal: '*'
+            Principal:
+              Service: cloudfront.amazonaws.com
             Action: 's3:GetObject'
             Resource: !Sub '${StagingBucket}/*'
+            Condition:
+              StringEquals:
+                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${StagingCloudFrontDistribution}'
 
-  # CloudFront Origin Access Identity
-  StagingOriginAccessIdentity:
-    Type: AWS::CloudFront::OriginAccessIdentity
+  # CloudFront Origin Access Control
+  StagingOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
     Properties:
-      OriginAccessIdentityConfig:
-        Comment: !Sub 'OAI for ${DomainName}'
+      OriginAccessControlConfig:
+        Name: !Sub 'OAC-${DomainName}'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
 
   # CloudFront Distribution
   StagingCloudFrontDistribution:
@@ -56,10 +63,11 @@ Resources:
         Aliases:
           - !Ref DomainName
         Origins:
-          - DomainName: !GetAtt StagingBucket.DomainName
+          - DomainName: !GetAtt StagingBucket.RegionalDomainName
             Id: S3Origin
             S3OriginConfig:
-              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${StagingOriginAccessIdentity}'
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !Ref StagingOriginAccessControl
         Enabled: true
         DefaultRootObject: 'index.html'
         CustomErrorResponses:

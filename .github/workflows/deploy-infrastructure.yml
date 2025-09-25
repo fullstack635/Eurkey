@@ -45,7 +45,7 @@ jobs:
           if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
             echo "STACK_NAME=eureky-staging" >> $GITHUB_ENV
             echo "DOMAIN_NAME=dev.eureky.ai" >> $GITHUB_ENV
-            echo "TEMPLATE_FILE=aws-infrastructure/cloudformation-staging-no-ssl.yml" >> $GITHUB_ENV
+            echo "TEMPLATE_FILE=aws-infrastructure/cloudformation-staging-simple.yml" >> $GITHUB_ENV
             echo "USE_SSL=false" >> $GITHUB_ENV
           else
             echo "STACK_NAME=eureky-production" >> $GITHUB_ENV

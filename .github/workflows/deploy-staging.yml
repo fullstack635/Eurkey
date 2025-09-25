@@ -66,11 +66,21 @@ jobs:
 
       - name: Invalidate CloudFront
         run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ steps.infra.outputs.distribution_id }} \
-            --paths "/*"
+          if [ "${{ steps.infra.outputs.distribution_id }}" != "PLACEHOLDER" ]; then
+            echo "Invalidating CloudFront distribution..."
+            aws cloudfront create-invalidation \
+              --distribution-id ${{ steps.infra.outputs.distribution_id }} \
+              --paths "/*"
+          else
+            echo "No CloudFront distribution to invalidate (using S3 direct)"
+          fi
 
       - name: Deployment status
         run: |
           echo "✅ Staging deployment completed successfully!"
-          echo "🌐 Site URL: https://dev.eureky.ai"
+          WEBSITE_URL=$(aws cloudformation describe-stacks \
+            --stack-name "eureky-staging" \
+            --region ${{ env.AWS_REGION }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`WebsiteURL`].OutputValue' \
+            --output text)
+          echo "🌐 Site URL: $WEBSITE_URL"

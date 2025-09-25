@@ -12,8 +12,8 @@ on:
           - staging
           - production
       certificate_arn:
-        description: 'ACM Certificate ARN (*.eureky.ai)'
-        required: true
+        description: 'ACM Certificate ARN (*.eureky.ai) - Required for production, optional for staging'
+        required: false
         type: string
 
 env:
@@ -45,11 +45,13 @@ jobs:
           if [ "${{ github.event.inputs.environment }}" = "staging" ]; then
             echo "STACK_NAME=eureky-staging" >> $GITHUB_ENV
             echo "DOMAIN_NAME=dev.eureky.ai" >> $GITHUB_ENV
-            echo "TEMPLATE_FILE=aws-infrastructure/cloudformation-staging.yml" >> $GITHUB_ENV
+            echo "TEMPLATE_FILE=aws-infrastructure/cloudformation-staging-no-ssl.yml" >> $GITHUB_ENV
+            echo "USE_SSL=false" >> $GITHUB_ENV
           else
             echo "STACK_NAME=eureky-production" >> $GITHUB_ENV
             echo "DOMAIN_NAME=eureky.ai" >> $GITHUB_ENV
             echo "TEMPLATE_FILE=aws-infrastructure/cloudformation-production.yml" >> $GITHUB_ENV
+            echo "USE_SSL=true" >> $GITHUB_ENV
           fi
 
       - name: Deploy CloudFormation stack
@@ -58,16 +60,28 @@ jobs:
           echo "Deploying ${{ github.event.inputs.environment }} environment..."
           echo "Stack Name: $STACK_NAME"
           echo "Domain: $DOMAIN_NAME"
-          echo "Certificate ARN: ${{ github.event.inputs.certificate_arn }}"
+          echo "Use SSL: $USE_SSL"
 
-          aws cloudformation deploy \
-            --template-file "$TEMPLATE_FILE" \
-            --stack-name "$STACK_NAME" \
-            --parameter-overrides \
-              DomainName="$DOMAIN_NAME" \
-              CertificateArn="${{ github.event.inputs.certificate_arn }}" \
-            --capabilities CAPABILITY_IAM \
-            --region $AWS_REGION
+          if [ "$USE_SSL" = "true" ]; then
+            echo "Certificate ARN: ${{ github.event.inputs.certificate_arn }}"
+            aws cloudformation deploy \
+              --template-file "$TEMPLATE_FILE" \
+              --stack-name "$STACK_NAME" \
+              --parameter-overrides \
+                DomainName="$DOMAIN_NAME" \
+                CertificateArn="${{ github.event.inputs.certificate_arn }}" \
+              --capabilities CAPABILITY_IAM \
+              --region $AWS_REGION
+          else
+            echo "Deploying without SSL certificate"
+            aws cloudformation deploy \
+              --template-file "$TEMPLATE_FILE" \
+              --stack-name "$STACK_NAME" \
+              --parameter-overrides \
+                DomainName="$DOMAIN_NAME" \
+              --capabilities CAPABILITY_IAM \
+              --region $AWS_REGION
+          fi
 
           # Get outputs
           echo "Getting stack outputs..."

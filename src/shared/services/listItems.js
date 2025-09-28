@@ -32,6 +32,18 @@ export const listItemsService = {
     }
   },
 
+  // Add a new item to default list (when no list is specified)
+  async addItemToDefaultList(itemData) {
+    try {
+      // According to the API docs, if no listId is provided in URL, it uses user's default list
+      // We can simulate this by calling the endpoint without specifying a list
+      const response = await apiClient.post('/list-items', itemData);
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Failed to add item to default list');
+    }
+  },
+
   // Update an existing item
   async updateItem(itemId, updates) {
     try {

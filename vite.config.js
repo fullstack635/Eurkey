@@ -23,7 +23,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'https://ri5k83gu18.execute-api.us-east-1.amazonaws.com/staging',
+        target: 'https://dev-api.eureky.ai',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         secure: true

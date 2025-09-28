@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "eureky-lists-api",
-		"name": "Eureky Lists & Items API",
-		"description": "API endpoints for managing lists and list items in Eureky",
+		"name": "Eureky Lists, Items & Reminders API",
+		"description": "API endpoints for managing lists, list items, and reminders in Eureky. Reminders are now implemented as special list items with scheduling capabilities.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"auth": {
@@ -18,8 +18,15 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://your-api-gateway-domain.amazonaws.com/dev",
-			"type": "string"
+			"value": "https://dev-api.eureky.ai",
+			"type": "string",
+			"description": "API Base URL for staging environment. Use https://api.eureky.ai for production."
+		},
+		{
+			"key": "base_url_prod",
+			"value": "https://api.eureky.ai",
+			"type": "string",
+			"description": "API Base URL for production environment"
 		},
 		{
 			"key": "auth_token",
@@ -150,7 +157,7 @@
 					}
 				},
 				{
-					"name": "Get User Lists",
+					"name": "Get User Lists (with Items)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -165,7 +172,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/lists?limit=20&include&offset=0&status=ACTIVE&isCompleted=false&orderBy=createdAt&orderDirection=desc",
+							"raw": "{{base_url}}/lists?limit=20&offset=0&status=ACTIVE&isCompleted=false&orderBy=createdAt&orderDirection=desc&includeItems=true&itemsLimit=5",
 							"host": [
 								"{{base_url}}"
 							],
@@ -175,27 +182,101 @@
 							"query": [
 								{
 									"key": "limit",
-									"value": "20"
+									"value": "20",
+									"description": "Maximum number of lists to return"
 								},
 								{
 									"key": "offset",
-									"value": "0"
+									"value": "0",
+									"description": "Number of lists to skip for pagination"
 								},
 								{
 									"key": "status",
-									"value": "ACTIVE"
+									"value": "ACTIVE",
+									"description": "Filter by list status (ACTIVE, COMPLETED, ARCHIVED, DELETED)"
 								},
 								{
 									"key": "isCompleted",
-									"value": "false"
+									"value": "false",
+									"description": "Filter by completion status (true/false)"
 								},
 								{
 									"key": "orderBy",
-									"value": "createdAt"
+									"value": "createdAt",
+									"description": "Sort by field (name, createdAt, updatedAt, completedAt)"
 								},
 								{
 									"key": "orderDirection",
-									"value": "desc"
+									"value": "desc",
+									"description": "Sort direction (asc/desc)"
+								},
+								{
+									"key": "includeItems",
+									"value": "true",
+									"description": "Include list items in response (true/false)"
+								},
+								{
+									"key": "itemsLimit",
+									"value": "5",
+									"description": "Maximum number of items per list when includeItems=true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Lists (basic)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/lists?limit=20&offset=0&status=ACTIVE&isCompleted=false&orderBy=createdAt&orderDirection=desc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lists"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Maximum number of lists to return"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Number of lists to skip for pagination"
+								},
+								{
+									"key": "status",
+									"value": "ACTIVE",
+									"description": "Filter by list status (ACTIVE, COMPLETED, ARCHIVED, DELETED)"
+								},
+								{
+									"key": "isCompleted",
+									"value": "false",
+									"description": "Filter by completion status (true/false)"
+								},
+								{
+									"key": "orderBy",
+									"value": "createdAt",
+									"description": "Sort by field (name, createdAt, updatedAt, completedAt)"
+								},
+								{
+									"key": "orderDirection",
+									"value": "desc",
+									"description": "Sort direction (asc/desc)"
 								}
 							]
 						}
@@ -294,10 +375,11 @@
 			]
 		},
 		{
-			"name": "List Items Management",
+			"name": "List Items Management (Including Reminders)",
+			"description": "List items can be regular items or reminders with scheduling capabilities. To create a reminder, include 'scheduledAt' field in the request body.",
 			"item": [
 				{
-					"name": "Add Item to List",
+					"name": "Add Regular Item to List",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -330,11 +412,50 @@
 								"by-list",
 								"{{list_id}}"
 							]
-						}
+						},
+						"description": "Creates a regular list item (without reminder functionality). Do not include 'scheduledAt' field."
 					}
 				},
 				{
-					"name": "Get List Items",
+					"name": "Create Reminder (List Item with scheduling)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Call client meeting\",\n  \"description\": \"Important client meeting about new project\",\n  \"scheduledAt\": \"2024-12-31T15:30:00.000Z\",\n  \"priority\": \"high\",\n  \"metadata\": {\n    \"originalText\": \"Remind me to call the client tomorrow at 3:30 PM\",\n    \"timezone\": \"America/New_York\",\n    \"phoneNumber\": \"+1234567890\",\n    \"category\": \"work\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/list-items/by-list/{{list_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"by-list",
+								"{{list_id}}"
+							]
+						},
+						"description": "Creates a new reminder as a list item. Include 'scheduledAt' to make it a reminder. If no listId in URL, use user's default list."
+					}
+				},
+				{
+					"name": "Get List Items (with reminder filtering)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -349,7 +470,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/list-items/by-list/{{list_id}}?limit=50&offset=0&isCompleted=false&priority=medium&orderBy=order&orderDirection=asc",
+							"raw": "{{base_url}}/list-items/by-list/{{list_id}}?limit=50&offset=0&reminderStatus=PENDING&isReminder=true&beforeDate=2024-12-31T23:59:59.999Z",
 							"host": [
 								"{{base_url}}"
 							],
@@ -361,34 +482,77 @@
 							"query": [
 								{
 									"key": "limit",
-									"value": "50"
+									"value": "50",
+									"description": "Maximum number of items to return"
 								},
 								{
 									"key": "offset",
-									"value": "0"
+									"value": "0",
+									"description": "Number of items to skip for pagination"
 								},
 								{
-									"key": "isCompleted",
-									"value": "false"
+									"key": "reminderStatus",
+									"value": "PENDING",
+									"description": "Filter by reminder status (PENDING, SENT, FAILED, CANCELLED, NONE)"
 								},
 								{
-									"key": "priority",
-									"value": "medium"
+									"key": "isReminder",
+									"value": "true",
+									"description": "Filter for items that are reminders (have scheduledAt)"
 								},
 								{
-									"key": "orderBy",
-									"value": "order"
-								},
-								{
-									"key": "orderDirection",
-									"value": "asc"
+									"key": "beforeDate",
+									"value": "2024-12-31T23:59:59.999Z",
+									"description": "Get reminders scheduled before this date (ISO 8601)"
 								}
 							]
-						}
+						},
+						"description": "Retrieves list items with filtering for reminders. Use query parameters to filter by reminder properties."
 					}
 				},
 				{
-					"name": "Update Item",
+					"name": "Get Due Reminders (System Endpoint)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/list-items/reminders/due?beforeDate=2024-12-31T23:59:59.999Z&limit=100&offset=0&includeOverdue=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"reminders",
+								"due"
+							],
+							"query": [
+								{
+									"key": "beforeDate",
+									"value": "2024-12-31T23:59:59.999Z",
+									"description": "Get reminders due before this date (default: now)"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of due reminders to return (1-500)"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Number of reminders to skip for pagination"
+								},
+								{
+									"key": "includeOverdue",
+									"value": "true",
+									"description": "Include overdue reminders (true/false)"
+								}
+							]
+						},
+						"description": "Gets all due reminders across all users. This endpoint is typically used by the system for processing reminders."
+					}
+				},
+				{
+					"name": "Update List Item/Reminder",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -409,7 +573,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"content\": \"Buy almond milk\",\n  \"description\": \"Get unsweetened almond milk from dairy section\",\n  \"priority\": \"high\",\n  \"order\": \"1\",\n  \"metadata\": {\n    \"category\": \"dairy\",\n    \"estimatedTime\": 5,\n    \"notes\": \"Check for organic options\"\n  }\n}"
+							"raw": "{\n  \"content\": \"Updated: Call client meeting about project\",\n  \"description\": \"Updated meeting description\",\n  \"scheduledAt\": \"2024-12-31T16:00:00.000Z\",\n  \"priority\": \"high\",\n  \"metadata\": {\n    \"originalText\": \"Updated reminder text\",\n    \"timezone\": \"America/New_York\",\n    \"category\": \"work\",\n    \"priority\": \"high\"\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/list-items/{{item_id}}",
@@ -420,7 +584,64 @@
 								"list-items",
 								"{{item_id}}"
 							]
-						}
+						},
+						"description": "Updates an existing list item or reminder. Include 'scheduledAt' to maintain reminder functionality."
+					}
+				},
+				{
+					"name": "Delete List Item/Reminder",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/list-items/{{item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"{{item_id}}"
+							]
+						},
+						"description": "Deletes a list item or reminder. Works for both regular items and reminders."
+					}
+				},
+				{
+					"name": "Update Reminder Status (System Endpoint)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"SENT\",\n  \"sentAt\": \"2024-12-31T15:30:00.000Z\",\n  \"errorMessage\": \"Optional error message for failed reminders\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/list-items/{{item_id}}/reminder-status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"list-items",
+								"{{item_id}}",
+								"reminder-status"
+							]
+						},
+						"description": "Updates the reminder status of a list item. Used by the system for marking reminders as SENT, FAILED, or CANCELLED."
 					}
 				},
 				{
@@ -448,34 +669,8 @@
 								"{{item_id}}",
 								"toggle"
 							]
-						}
-					}
-				},
-				{
-					"name": "Delete Item",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{auth_token}}",
-									"type": "string"
-								}
-							]
 						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/list-items/{{item_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"list-items",
-								"{{item_id}}"
-							]
-						}
+						"description": "Toggle the completion status of a list item or reminder."
 					}
 				}
 			]
@@ -511,6 +706,11 @@
 		{
 			"key": "item_id",
 			"value": "your-item-id-here",
+			"type": "string"
+		},
+		{
+			"key": "reminder_id",
+			"value": "your-reminder-id-here",
 			"type": "string"
 		}
 	]

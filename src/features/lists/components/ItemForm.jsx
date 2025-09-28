@@ -8,7 +8,9 @@ const ItemForm = ({ onSubmit, onCancel, initialData = null, loading = false }) =
     order: initialData?.order || '',
     category: initialData?.metadata?.category || '',
     estimatedTime: initialData?.metadata?.estimatedTime || '',
-    notes: initialData?.metadata?.notes || ''
+    notes: initialData?.metadata?.notes || '',
+    scheduledAt: initialData?.scheduledAt ? new Date(initialData.scheduledAt).toISOString().slice(0, 16) : '',
+    isReminder: !!initialData?.scheduledAt
   });
 
   const handleSubmit = (e) => {
@@ -26,6 +28,11 @@ const ItemForm = ({ onSubmit, onCancel, initialData = null, loading = false }) =
         notes: formData.notes.trim()
       }
     };
+
+    // Add scheduledAt if this is a reminder
+    if (formData.isReminder && formData.scheduledAt) {
+      submitData.scheduledAt = new Date(formData.scheduledAt).toISOString();
+    }
 
     // Remove empty metadata fields
     Object.keys(submitData.metadata).forEach(key => {
@@ -128,6 +135,37 @@ const ItemForm = ({ onSubmit, onCancel, initialData = null, loading = false }) =
             placeholder="Additional notes or instructions"
             rows={2}
           />
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="isReminder"
+              checked={formData.isReminder}
+              onChange={(e) => handleChange('isReminder', e.target.checked)}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isReminder" className="ml-2 block text-sm font-medium text-gray-700">
+              Set as reminder
+            </label>
+          </div>
+
+          {formData.isReminder && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Scheduled Date & Time *
+              </label>
+              <input
+                type="datetime-local"
+                value={formData.scheduledAt}
+                onChange={(e) => handleChange('scheduledAt', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required={formData.isReminder}
+                min={new Date().toISOString().slice(0, 16)}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex space-x-3">

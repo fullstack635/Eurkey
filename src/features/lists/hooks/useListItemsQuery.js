@@ -30,10 +30,10 @@ export const useAddItemToList = () => {
     mutationFn: ({ listId, itemData }) => listItemsService.addItemToList(listId, itemData),
     onSuccess: (response, variables) => {
       // Invalidate and refetch list items for the specific list
-      queryClient.invalidateQueries({ 
-        queryKey: listItemsKeys.list(variables.listId) 
+      queryClient.invalidateQueries({
+        queryKey: listItemsKeys.list(variables.listId)
       });
-      
+
       // Add success notification
       addNotification({
         type: 'success',
@@ -47,6 +47,35 @@ export const useAddItemToList = () => {
         type: 'error',
         title: 'Error',
         message: error.message || 'Error al agregar el item',
+      });
+    },
+  });
+};
+
+// Hook to add a new item to default list
+export const useAddItemToDefaultList = () => {
+  const queryClient = useQueryClient();
+  const { addNotification } = useNotifications();
+
+  return useMutation({
+    mutationFn: (itemData) => listItemsService.addItemToDefaultList(itemData),
+    onSuccess: (response) => {
+      // Invalidate all list items queries to refresh data
+      queryClient.invalidateQueries({ queryKey: listItemsKeys.all });
+
+      // Add success notification
+      addNotification({
+        type: 'success',
+        title: 'Éxito',
+        message: response.message || 'Item agregado a la lista por defecto exitosamente',
+      });
+    },
+    onError: (error) => {
+      // Add error notification
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: error.message || 'Error al agregar el item a la lista por defecto',
       });
     },
   });

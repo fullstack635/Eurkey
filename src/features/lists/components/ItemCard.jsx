@@ -1,10 +1,18 @@
-import { Edit, Trash2, Clock } from 'lucide-react';
+import { Edit, Trash2, Clock, Calendar, AlertCircle } from 'lucide-react';
 
 const ItemCard = ({ item, onEdit, onDelete, onToggleCompletion }) => {
+  const isReminder = !!item.scheduledAt;
+  const reminderDate = isReminder ? new Date(item.scheduledAt) : null;
+  const isOverdue = reminderDate && reminderDate < new Date() && !item.isCompleted;
+
   return (
     <div className={`bg-white p-4 rounded-lg border transition-all ${
-      item.isCompleted 
-        ? 'border-green-200 bg-green-50' 
+      item.isCompleted
+        ? 'border-green-200 bg-green-50'
+        : isOverdue
+        ? 'border-red-200 bg-red-50'
+        : isReminder
+        ? 'border-blue-200 bg-blue-50'
         : 'border-gray-200 hover:border-gray-300'
     }`}>
       <div className="flex items-start space-x-3">
@@ -57,6 +65,23 @@ const ItemCard = ({ item, onEdit, onDelete, onToggleCompletion }) => {
               </div>
             )}
           </div>
+
+          {/* Reminder information */}
+          {isReminder && (
+            <div className={`flex items-center mt-2 text-xs ${
+              isOverdue ? 'text-red-600' : 'text-blue-600'
+            }`}>
+              {isOverdue ? (
+                <AlertCircle className="w-3 h-3 mr-1" />
+              ) : (
+                <Calendar className="w-3 h-3 mr-1" />
+              )}
+              <span className="font-medium">
+                {isOverdue ? 'Overdue: ' : 'Scheduled: '}
+                {reminderDate.toLocaleDateString()} at {reminderDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
 
           {/* Order indicator */}
           {item.order && (

@@ -1,6 +1,4 @@
-const API_BASE_URL = import.meta.env.DEV 
-  ? '/api' 
-  : import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {
@@ -9,10 +7,10 @@ class ApiClient {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     // Get auth token from localStorage
     const token = localStorage.getItem('authToken');
-    
+
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -30,7 +28,7 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);

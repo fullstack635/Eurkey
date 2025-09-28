@@ -5,7 +5,7 @@ import ListForm from './components/ListForm';
 import ItemCard from './components/ItemCard';
 import ItemForm from './components/ItemForm';
 import { useListsOperations } from './hooks/useListsQuery';
-import { useAddItemToList, useToggleItemCompletion, useDeleteItem, useListItemsOperations } from './hooks/useListItemsQuery';
+import { useAddItemToList, useToggleItemCompletion, useDeleteItem, useListItemsOperations, useAddItemToDefaultList } from './hooks/useListItemsQuery';
 
 const Lists = () => {
   const {
@@ -23,6 +23,7 @@ const Lists = () => {
 
   // Item operations for inline management
   const addItemMutation = useAddItemToList();
+  const addItemToDefaultMutation = useAddItemToDefaultList();
   const toggleItemMutation = useToggleItemCompletion();
   const deleteItemMutation = useDeleteItem();
 
@@ -31,6 +32,7 @@ const Lists = () => {
   const [selectedList, setSelectedList] = useState(null);
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [filters, setFilters] = useState({
     status: 'ACTIVE',
     isCompleted: false
@@ -143,6 +145,23 @@ const Lists = () => {
     deleteItemMutation.mutate(itemId);
   };
 
+  // Quick add handlers
+  const handleQuickAdd = () => {
+    setShowQuickAdd(true);
+  };
+
+  const handleSubmitQuickAdd = (itemData) => {
+    addItemToDefaultMutation.mutate(itemData, {
+      onSuccess: () => {
+        setShowQuickAdd(false);
+      }
+    });
+  };
+
+  const handleCancelQuickAdd = () => {
+    setShowQuickAdd(false);
+  };
+
   if (listsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -240,13 +259,22 @@ const Lists = () => {
           <h1 className="text-2xl font-bold text-gray-900">Lists</h1>
           <p className="text-gray-600">Organize your tasks and items into lists</p>
         </div>
-        <button
-          onClick={handleCreateList}
-          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          New List
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleQuickAdd}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Quick Add Item
+          </button>
+          <button
+            onClick={handleCreateList}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New List
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -279,6 +307,20 @@ const Lists = () => {
           </div>
         </div>
       </div>
+
+      {/* Quick Add Form */}
+      {showQuickAdd && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-blue-900 mb-3">
+            Quick Add Item (Default List)
+          </h3>
+          <ItemForm
+            onSubmit={handleSubmitQuickAdd}
+            onCancel={handleCancelQuickAdd}
+            loading={addItemToDefaultMutation.isPending}
+          />
+        </div>
+      )}
 
       {/* List Form */}
       {showListForm && (

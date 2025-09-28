@@ -1,9 +1,9 @@
-name: Deploy to S3 prod
+name: Deploy to S3 production
 
 on:
   push:
     branches:
-      - main-off
+      - main
 
 env:
   NODE_VERSION: '18'

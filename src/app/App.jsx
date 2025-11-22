@@ -18,7 +18,7 @@ function App() {
     <QueryProvider>
       <AppProvider>
         <TooltipProvider>
-          <ThemeSwitcher />
+          <ThemeSwitcher className="hidden" />
           <Toaster />
           <Sonner />
           <Router>
